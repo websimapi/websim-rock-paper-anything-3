@@ -1,0 +1,640 @@
+<html><head><base href="https://rock-paper-anything.games/" />
+<title>⛰️📄❓ Rock Paper Anything</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+body, html {
+  font-family: 'Roboto', sans-serif;
+  background: linear-gradient(135deg, #FF9A8B, #FF6A88, #FF99AC);
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.game-container {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  text-align: center;
+  width: 90%;
+  max-width: 600px;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow-y: auto;
+  position: relative;
+}
+h1 {
+  color: #333;
+  font-size: 2.5em;
+  margin-bottom: 20px;
+}
+#current-object {
+  font-size: 8em;
+  margin: 20px 0;
+  transition: transform 0.5s ease-in-out;
+}
+.input-group {
+  display: flex;
+  margin-bottom: 20px;
+}
+input[type="text"] {
+  flex-grow: 1;
+  padding: 15px;
+  font-size: 18px;
+  border: 2px solid #FF99AC;
+  border-radius: 10px 0 0 10px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+input[type="text"]:focus {
+  border-color: #FF6A88;
+}
+button {
+  padding: 15px 25px;
+  font-size: 18px;
+  background-color: #FF6A88;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+button:hover {
+  background-color: #FF9A8B;
+}
+#result {
+  margin-top: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  min-height: 30px;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+#used-objects {
+  margin-top: 20px;
+  font-size: 18px;
+}
+.links {
+  margin-top: 30px;
+  display: flex;
+  justify-content: space-around;
+}
+.links a {
+  color: #FF6A88;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s;
+}
+.links a:hover {
+  color: #FF9A8B;
+}
+#tutorial {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.tutorial-content {
+  background-color: white;
+  padding: 30px;
+  border-radius: 20px;
+  max-width: 80%;
+  text-align: left;
+}
+.tutorial-content h2 {
+  color: #FF6A88;
+  margin-bottom: 20px;
+}
+.tutorial-content p {
+  margin-bottom: 15px;
+}
+.tutorial-content ul {
+  margin-bottom: 15px;
+  padding-left: 20px;
+}
+#close-tutorial {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #FF6A88;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+#close-tutorial:hover {
+  background-color: #FF9A8B;
+}
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+  40% {transform: translateY(-30px);}
+  60% {transform: translateY(-15px);}
+}
+.loading {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  border-top-color: #FF6A88;
+  animation: spin 1s ease-in-out infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+#emoji-selector {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.emoji-option {
+  font-size: 24px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.emoji-option:hover {
+  transform: scale(1.2);
+}
+#start-game, #play-now {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 18px;
+}
+#start-game:hover, #play-now:hover {
+  background-color: #45a049;
+}
+#game-area {
+  display: none;
+}
+#object-history {
+  margin-top: 20px;
+  text-align: left;
+}
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.delete-object {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.delete-object:hover {
+  background-color: #d32f2f;
+}
+#play-mode-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+#play-mode-btn:hover {
+  background-color: #45a049;
+}
+#play-mode-area {
+  display: none;
+  margin-top: 20px;
+}
+#player-objects, #computer-object {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+.player-object-btn {
+  font-size: 20px;
+  margin: 5px;
+  padding: 10px;
+  cursor: pointer;
+}
+#object-details {
+  margin-top: 20px;
+  text-align: left;
+}
+</style>
+</head>
+<body>
+<div class="game-container">
+  <h1>⛰️📄❓ Rock Paper Anything</h1>
+  
+  <button id="play-mode-btn">Play Mode</button>
+
+  <div id="emoji-selector">
+    <div class="emoji-option" data-emoji="⛰️">⛰️</div>
+    <div class="emoji-option" data-emoji="📄">📄</div>
+    <div class="emoji-option" data-emoji="✂️">✂️</div>
+    <div class="emoji-option" data-emoji="🔥">🔥</div>
+    <div class="emoji-option" data-emoji="💧">💧</div>
+    <div class="emoji-option" data-emoji="🌪️">🌪️</div>
+    <div class="emoji-option" data-emoji="🌳">🌳</div>
+    <div class="emoji-option" data-emoji="🦁">🦁</div>
+    <div class="emoji-option" data-emoji="🐘">🐘</div>
+    <div class="emoji-option" data-emoji="🚀">🚀</div>
+  </div>
+  
+  <button id="start-game">Start New Game</button>
+  <button id="play-now">Play with Saved Objects</button>
+
+  <div id="game-area">
+    <p>Enter a Thing that beats the current object:</p>
+    <div id="current-object"></div>
+    <div class="input-group">
+      <input type="text" id="user-input" placeholder="Type an emoji or word" required>
+      <button id="submit-btn">Beat It!</button>
+    </div>
+    <div id="result"></div>
+    <div id="used-objects"></div>
+  </div>
+
+  <div id="play-mode-area">
+    <div id="computer-object">Computer's Object: </div>
+    <div id="player-objects">Your Objects: </div>
+    <div id="play-result"></div>
+  </div>
+
+  <div id="object-history">
+    <h3>Object History:</h3>
+  </div>
+
+  <div id="object-details">
+    <h3>Object Details:</h3>
+  </div>
+
+  <div class="links">
+    <a href="/rules">📜 Rules</a>
+    <a href="/about">ℹ️ About</a>
+    <a href="/leaderboard">🏆 Leaderboard</a>
+    <a href="#" id="show-tutorial">❓ How to Play</a>
+  </div>
+</div>
+
+<div id="tutorial">
+  <div class="tutorial-content">
+    <h2>How to Play Rock Paper Anything</h2>
+    <p>Welcome to Rock Paper Anything, where creativity meets logic! Here's how to play:</p>
+    <ul>
+      <li>Start by selecting an emoji from the options provided or use your saved objects.</li>
+      <li>Once the game begins, look at the current object displayed.</li>
+      <li>Think of something that could logically beat that object.</li>
+      <li>Type your answer in the input field. It can be an emoji or a word.</li>
+      <li>Click "Beat It!" or press Enter to submit your answer.</li>
+      <li>Our AI will evaluate if your object can logically beat the current one.</li>
+      <li>If your answer is accepted, you win the round!</li>
+      <li>The game continues with your object becoming the new one to beat.</li>
+      <li>Try to create the longest chain of winning objects!</li>
+    </ul>
+    <p>Play Mode:</p>
+    <ul>
+      <li>Click the "Play Mode" button to start a game with your created objects.</li>
+      <li>The computer will randomly select an object from your list.</li>
+      <li>Choose one of your objects to beat the computer's object.</li>
+      <li>The game will determine the winner based on the relationships you've created.</li>
+    </ul>
+    <p>Remember:</p>
+    <ul>
+      <li>Be creative but logical! The AI will check if your object can realistically beat the current one.</li>
+      <li>Your answer should have a clear and justifiable connection to beating the current object.</li>
+      <li>In Play Mode, you can repeat objects, allowing for more strategic gameplay.</li>
+      <li>Your objects are saved locally, allowing you to continue your game later or start a new one with your created objects!</li>
+    </ul>
+    <p>Example: Rock ⛰️ → Dynamite 💣 → Water 💧 → Sun ☀️ → Black Hole 🕳️</p>
+    <button id="close-tutorial">Got it, let's play!</button>
+  </div>
+</div>
+
+<script>
+const currentObject = document.getElementById('current-object');
+const userInput = document.getElementById('user-input');
+const submitBtn = document.getElementById('submit-btn');
+const result = document.getElementById('result');
+const usedObjects = document.getElementById('used-objects');
+const showTutorial = document.getElementById('show-tutorial');
+const closeTutorial = document.getElementById('close-tutorial');
+const tutorial = document.getElementById('tutorial');
+const emojiSelector = document.getElementById('emoji-selector');
+const startGameBtn = document.getElementById('start-game');
+const playNowBtn = document.getElementById('play-now');
+const gameArea = document.getElementById('game-area');
+const objectHistory = document.getElementById('object-history');
+const playModeBtn = document.getElementById('play-mode-btn');
+const playModeArea = document.getElementById('play-mode-area');
+const computerObject = document.getElementById('computer-object');
+const playerObjects = document.getElementById('player-objects');
+const playResult = document.getElementById('play-result');
+const objectDetails = document.getElementById('object-details');
+
+let usedObjectsArray = [];
+let selectedEmoji = '';
+let objectRelations = {};
+
+function loadFromLocalStorage() {
+  const savedObjects = localStorage.getItem('usedObjects');
+  const savedRelations = localStorage.getItem('objectRelations');
+  if (savedObjects) {
+    usedObjectsArray = JSON.parse(savedObjects);
+    updateObjectHistory();
+  }
+  if (savedRelations) {
+    objectRelations = JSON.parse(savedRelations);
+  }
+  updateObjectDetails();
+}
+
+function saveToLocalStorage() {
+  localStorage.setItem('usedObjects', JSON.stringify(usedObjectsArray));
+  localStorage.setItem('objectRelations', JSON.stringify(objectRelations));
+  updateObjectHistory();
+  updateObjectDetails();
+}
+
+function updateObjectHistory() {
+  objectHistory.innerHTML = '<h3>Object History:</h3>';
+  usedObjectsArray.forEach((obj, index) => {
+    const historyItem = document.createElement('div');
+    historyItem.className = 'history-item';
+    historyItem.innerHTML = `
+      <span>${obj}</span>
+      <button class="delete-object" data-index="${index}">Delete</button>
+    `;
+    objectHistory.appendChild(historyItem);
+  });
+}
+
+function updateObjectDetails() {
+  objectDetails.innerHTML = '<h3>Object Details:</h3>';
+  for (let obj in objectRelations) {
+    const detailItem = document.createElement('div');
+    detailItem.innerHTML = `<strong>${obj}</strong>:<br>
+      Beats: ${objectRelations[obj].beats.join(', ') || 'None'}<br>
+      Beaten by: ${objectRelations[obj].beatenBy.join(', ') || 'None'}`;
+    objectDetails.appendChild(detailItem);
+  }
+}
+
+function deleteObject(index) {
+  const deletedObject = usedObjectsArray[index];
+  usedObjectsArray.splice(index, 1);
+  // Remove relations involving the deleted object
+  delete objectRelations[deletedObject];
+  for (let obj in objectRelations) {
+    objectRelations[obj].beats = objectRelations[obj].beats.filter(item => item !== deletedObject);
+    objectRelations[obj].beatenBy = objectRelations[obj].beatenBy.filter(item => item !== deletedObject);
+  }
+  saveToLocalStorage();
+}
+
+function updateUsedObjects() {
+  usedObjects.textContent = 'Used objects: ' + usedObjectsArray.join(', ');
+}
+
+function animateCurrentObject() {
+  currentObject.style.animation = 'bounce 1s';
+  setTimeout(() => {
+    currentObject.style.animation = '';
+  }, 1000);
+}
+
+function showResult(message, isLoading = false) {
+  result.innerHTML = isLoading ? '<div class="loading"></div>' : message;
+  result.style.opacity = '0';
+  setTimeout(() => {
+    result.style.opacity = '1';
+  }, 100);
+}
+
+function combineEmojiData(emoji1, emoji2) {
+  if (emoji1 === emoji2) return;
+  
+  if (!objectRelations[emoji1]) {
+    objectRelations[emoji1] = { beats: [], beatenBy: [] };
+  }
+  if (!objectRelations[emoji2]) {
+    objectRelations[emoji2] = { beats: [], beatenBy: [] };
+  }
+
+  objectRelations[emoji1].beats = [...new Set([...objectRelations[emoji1].beats, ...objectRelations[emoji2].beats])];
+  objectRelations[emoji1].beatenBy = [...new Set([...objectRelations[emoji1].beatenBy, ...objectRelations[emoji2].beatenBy])];
+
+  // Update relations for other objects
+  for (let obj in objectRelations) {
+    if (objectRelations[obj].beats.includes(emoji2)) {
+      objectRelations[obj].beats = [...new Set([...objectRelations[obj].beats, emoji1])];
+    }
+    if (objectRelations[obj].beatenBy.includes(emoji2)) {
+      objectRelations[obj].beatenBy = [...new Set([...objectRelations[obj].beatenBy, emoji1])];
+    }
+  }
+
+  // Remove emoji2 from usedObjectsArray and objectRelations
+  usedObjectsArray = usedObjectsArray.filter(obj => obj !== emoji2);
+  delete objectRelations[emoji2];
+
+  saveToLocalStorage();
+}
+
+async function submitObject() {
+  const newObject = userInput.value.trim();
+  if (!newObject) return;
+
+  showResult('', true); // Show loading spinner
+  submitBtn.disabled = true;
+
+  try {
+    const response = await fetch('/api/validateMove', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        currentObject: currentObject.textContent,
+        newObject: newObject,
+        usedObjects: usedObjectsArray,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.valid) {
+      currentObject.style.transform = 'scale(0)';
+      setTimeout(() => {
+        currentObject.textContent = data.newObject;
+        currentObject.style.transform = 'scale(1)';
+        animateCurrentObject();
+      }, 300);
+
+      // Update object relations
+      if (!objectRelations[data.newObject]) {
+        objectRelations[data.newObject] = { beats: [], beatenBy: [] };
+      }
+      if (!objectRelations[currentObject.textContent]) {
+        objectRelations[currentObject.textContent] = { beats: [], beatenBy: [] };
+      }
+      objectRelations[data.newObject].beats.push(currentObject.textContent);
+      objectRelations[currentObject.textContent].beatenBy.push(data.newObject);
+
+      // Check if the new object already exists and combine data if necessary
+      const existingIndex = usedObjectsArray.findIndex(obj => obj === data.newObject);
+      if (existingIndex !== -1) {
+        combineEmojiData(data.newObject, usedObjectsArray[existingIndex]);
+      } else {
+        usedObjectsArray.push(data.newObject);
+      }
+
+      updateUsedObjects();
+      saveToLocalStorage();
+      showResult(data.message);
+    } else {
+      showResult(data.message);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    showResult('An error occurred. Please try again.');
+  }
+
+  userInput.value = '';
+  submitBtn.disabled = false;
+}
+
+function startPlayMode() {
+  if (usedObjectsArray.length < 2) {
+    alert('You need at least 2 objects to play. Create more objects first!');
+    return;
+  }
+
+  gameArea.style.display = 'none';
+  playModeArea.style.display = 'block';
+  
+  // Select random computer object
+  const computerObj = usedObjectsArray[Math.floor(Math.random() * usedObjectsArray.length)];
+  computerObject.textContent = 'Computer\'s Object: ' + computerObj;
+
+  // Display player objects as buttons
+  playerObjects.innerHTML = 'Your Objects: ';
+  usedObjectsArray.forEach(obj => {
+    const objButton = document.createElement('button');
+    objButton.textContent = obj;
+    objButton.className = 'player-object-btn';
+    objButton.onclick = () => playRound(obj, computerObj);
+    playerObjects.appendChild(objButton);
+  });
+
+  playResult.textContent = '';
+}
+
+function playRound(playerObj, computerObj) {
+  if (objectRelations[playerObj] && objectRelations[playerObj].beats.includes(computerObj)) {
+    playResult.textContent = `You win! ${playerObj} beats ${computerObj}`;
+  } else if (objectRelations[computerObj] && objectRelations[computerObj].beats.includes(playerObj)) {
+    playResult.textContent = `You lose! ${computerObj} beats ${playerObj}`;
+  } else {
+    playResult.textContent = "It's a tie! No clear winner.";
+  }
+
+  // Start a new round after a short delay
+  setTimeout(startPlayMode, 2000);
+}
+
+emojiSelector.addEventListener('click', (e) => {
+  if (e.target.classList.contains('emoji-option')) {
+    selectedEmoji = e.target.dataset.emoji;
+    emojiSelector.querySelectorAll('.emoji-option').forEach(option => {
+      option.style.border = 'none';
+    });
+    e.target.style.border = '2px solid #FF6A88';
+    startGameBtn.disabled = false;
+  }
+});
+
+startGameBtn.addEventListener('click', () => {
+  if (selectedEmoji) {
+    emojiSelector.style.display = 'none';
+    startGameBtn.style.display = 'none';
+    playNowBtn.style.display = 'none';
+    gameArea.style.display = 'block';
+    playModeArea.style.display = 'none';
+    currentObject.textContent = selectedEmoji;
+    if (!usedObjectsArray.includes(selectedEmoji)) {
+      usedObjectsArray.push(selectedEmoji);
+    }
+    if (!objectRelations[selectedEmoji]) {
+      objectRelations[selectedEmoji] = { beats: [], beatenBy: [] };
+    }
+    updateUsedObjects();
+    saveToLocalStorage();
+    animateCurrentObject();
+  }
+});
+
+playNowBtn.addEventListener('click', () => {
+  if (usedObjectsArray.length > 0) {
+    emojiSelector.style.display = 'none';
+    startGameBtn.style.display = 'none';
+    playNowBtn.style.display = 'none';
+    gameArea.style.display = 'block';
+    playModeArea.style.display = 'none';
+    currentObject.textContent = usedObjectsArray[usedObjectsArray.length - 1];
+    updateUsedObjects();
+    animateCurrentObject();
+  } else {
+    alert('No saved objects found. Please start a new game.');
+  }
+});
+
+submitBtn.addEventListener('click', submitObject);
+userInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    submitObject();
+  }
+});
+
+showTutorial.addEventListener('click', (e) => {
+  e.preventDefault();
+  tutorial.style.display = 'flex';
+});
+
+closeTutorial.addEventListener('click', () => {
+  tutorial.style.display = 'none';
+});
+
+objectHistory.addEventListener('click', (e) => {
+  if (e.target.classList.contains('delete-object')) {
+    const index = parseInt(e.target.dataset.index);
+    deleteObject(index);
+  }
+});
+
+playModeBtn.addEventListener('click', startPlayMode);
+
+startGameBtn.disabled = true;
+loadFromLocalStorage();
+</script>
+
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4c6229722a6346bc8eb5cb0e5eae5d41","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body></html>
