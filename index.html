@@ -429,36 +429,6 @@ function showResult(message, isLoading = false) {
   }, 100);
 }
 
-function combineEmojiData(emoji1, emoji2) {
-  if (emoji1 === emoji2) return;
-  
-  if (!objectRelations[emoji1]) {
-    objectRelations[emoji1] = { beats: [], beatenBy: [] };
-  }
-  if (!objectRelations[emoji2]) {
-    objectRelations[emoji2] = { beats: [], beatenBy: [] };
-  }
-
-  objectRelations[emoji1].beats = [...new Set([...objectRelations[emoji1].beats, ...objectRelations[emoji2].beats])];
-  objectRelations[emoji1].beatenBy = [...new Set([...objectRelations[emoji1].beatenBy, ...objectRelations[emoji2].beatenBy])];
-
-  // Update relations for other objects
-  for (let obj in objectRelations) {
-    if (objectRelations[obj].beats.includes(emoji2)) {
-      objectRelations[obj].beats = [...new Set([...objectRelations[obj].beats, emoji1])];
-    }
-    if (objectRelations[obj].beatenBy.includes(emoji2)) {
-      objectRelations[obj].beatenBy = [...new Set([...objectRelations[obj].beatenBy, emoji1])];
-    }
-  }
-
-  // Remove emoji2 from usedObjectsArray and objectRelations
-  usedObjectsArray = usedObjectsArray.filter(obj => obj !== emoji2);
-  delete objectRelations[emoji2];
-
-  saveToLocalStorage();
-}
-
 async function submitObject() {
   const newObject = userInput.value.trim();
   if (!newObject) return;
@@ -467,51 +437,70 @@ async function submitObject() {
   submitBtn.disabled = true;
 
   try {
-    const response = await fetch('/api/validateMove', {
+    // First get AI validation of the relationship
+    const aiResponse = await fetch('/api/ai_completion', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        currentObject: currentObject.textContent,
-        newObject: newObject,
-        usedObjects: usedObjectsArray,
-      }),
+        prompt: `Evaluate if ${newObject} can logically beat ${currentObject.textContent}.
+        Consider real world physics, properties, and logical relationships.
+        Respond with explanation of why it works or doesn't work.
+        
+        <typescript-interface>
+        interface Response {
+          valid: boolean;
+          explanation: string;
+        }
+        </typescript-interface>
+        
+        <example>
+        {
+          "valid": true,
+          "explanation": "Water can extinguish fire because it cools the fuel and prevents oxygen from reaching the flames."
+        }
+        </example>`,
+        data: {
+          newObject,
+          currentObject: currentObject.textContent
+        }
+      })
     });
 
-    const data = await response.json();
+    const aiData = await aiResponse.json();
 
-    if (data.valid) {
+    if (aiData.valid) {
       currentObject.style.transform = 'scale(0)';
       setTimeout(() => {
-        currentObject.textContent = data.newObject;
+        currentObject.textContent = newObject;
         currentObject.style.transform = 'scale(1)';
         animateCurrentObject();
       }, 300);
 
       // Update object relations
-      if (!objectRelations[data.newObject]) {
-        objectRelations[data.newObject] = { beats: [], beatenBy: [] };
+      if (!objectRelations[newObject]) {
+        objectRelations[newObject] = { beats: [], beatenBy: [] };
       }
       if (!objectRelations[currentObject.textContent]) {
         objectRelations[currentObject.textContent] = { beats: [], beatenBy: [] };
       }
-      objectRelations[data.newObject].beats.push(currentObject.textContent);
-      objectRelations[currentObject.textContent].beatenBy.push(data.newObject);
+      objectRelations[newObject].beats.push(currentObject.textContent);
+      objectRelations[currentObject.textContent].beatenBy.push(newObject);
 
-      // Check if the new object already exists and combine data if necessary
-      const existingIndex = usedObjectsArray.findIndex(obj => obj === data.newObject);
+      // Check for existing object and combine data if necessary
+      const existingIndex = usedObjectsArray.findIndex(obj => obj === newObject);
       if (existingIndex !== -1) {
-        combineEmojiData(data.newObject, usedObjectsArray[existingIndex]);
+        combineEmojiData(newObject, usedObjectsArray[existingIndex]);
       } else {
-        usedObjectsArray.push(data.newObject);
+        usedObjectsArray.push(newObject);
       }
 
       updateUsedObjects();
       saveToLocalStorage();
-      showResult(data.message);
+      showResult(aiData.explanation);
     } else {
-      showResult(data.message);
+      showResult(aiData.explanation);
     }
   } catch (error) {
     console.error('Error:', error);
@@ -522,43 +511,83 @@ async function submitObject() {
   submitBtn.disabled = false;
 }
 
-function startPlayMode() {
-  if (usedObjectsArray.length < 2) {
-    alert('You need at least 2 objects to play. Create more objects first!');
-    return;
+// Add this helper function to get AI-generated relationships
+async function getObjectRelationships(obj1, obj2) {
+  try {
+    const response = await fetch('/api/ai_completion', {
+      method: 'POST', 
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: `Analyze the relationship between ${obj1} and ${obj2}.
+        Determine which object would win in a conflict and why.
+        
+        <typescript-interface>
+        interface Response {
+          winner: string;
+          loser: string;
+          explanation: string;
+        }
+        </typescript-interface>
+        
+        <example>
+        {
+          "winner": "scissors",
+          "loser": "paper",
+          "explanation": "Scissors can cut through paper, making them the winner in this matchup."
+        }
+        </example>`,
+        data: {
+          object1: obj1,
+          object2: obj2
+        }
+      })
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error getting relationship:', error);
+    return null;
   }
-
-  gameArea.style.display = 'none';
-  playModeArea.style.display = 'block';
-  
-  // Select random computer object
-  const computerObj = usedObjectsArray[Math.floor(Math.random() * usedObjectsArray.length)];
-  computerObject.textContent = 'Computer\'s Object: ' + computerObj;
-
-  // Display player objects as buttons
-  playerObjects.innerHTML = 'Your Objects: ';
-  usedObjectsArray.forEach(obj => {
-    const objButton = document.createElement('button');
-    objButton.textContent = obj;
-    objButton.className = 'player-object-btn';
-    objButton.onclick = () => playRound(obj, computerObj);
-    playerObjects.appendChild(objButton);
-  });
-
-  playResult.textContent = '';
 }
 
-function playRound(playerObj, computerObj) {
+// Update playRound function to use AI for uncertain matchups
+async function playRound(playerObj, computerObj) {
+  // First check existing relationships
   if (objectRelations[playerObj] && objectRelations[playerObj].beats.includes(computerObj)) {
     playResult.textContent = `You win! ${playerObj} beats ${computerObj}`;
   } else if (objectRelations[computerObj] && objectRelations[computerObj].beats.includes(playerObj)) {
     playResult.textContent = `You lose! ${computerObj} beats ${playerObj}`;
   } else {
-    playResult.textContent = "It's a tie! No clear winner.";
+    // If relationship isn't known, ask the AI
+    playResult.textContent = "Analyzing matchup...";
+    const relationship = await getObjectRelationships(playerObj, computerObj);
+    
+    if (relationship) {
+      if (relationship.winner === playerObj) {
+        playResult.textContent = `You win! ${relationship.explanation}`;
+        // Store this new relationship
+        if (!objectRelations[playerObj].beats.includes(computerObj)) {
+          objectRelations[playerObj].beats.push(computerObj);
+          objectRelations[computerObj].beatenBy.push(playerObj);
+          saveToLocalStorage();
+        }
+      } else if (relationship.winner === computerObj) {
+        playResult.textContent = `You lose! ${relationship.explanation}`;
+        if (!objectRelations[computerObj].beats.includes(playerObj)) {
+          objectRelations[computerObj].beats.push(playerObj);
+          objectRelations[playerObj].beatenBy.push(computerObj);
+          saveToLocalStorage();
+        }
+      }
+    } else {
+      playResult.textContent = "It's a tie! No clear winner.";
+    }
   }
 
-  // Start a new round after a short delay
-  setTimeout(startPlayMode, 2000);
+  // Start a new round after a delay
+  setTimeout(startPlayMode, 3000);
 }
 
 emojiSelector.addEventListener('click', (e) => {
