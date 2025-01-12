@@ -431,21 +431,23 @@ async function submitObject() {
       body: JSON.stringify({
         prompt: `Evaluate if ${newObject} can logically beat ${currentObject.textContent}.
         Consider real world physics, properties, and logical relationships.
+        Be generous in allowing logical relationships - if there's any reasonable way it could work, allow it.
+        Think creatively about how objects could interact.
+        Consider size, strength, abilities, and natural properties.
         Respond with explanation of why it works or doesn't work.
+        Also suggest an appropriate emoji to represent the object if text was entered.
         
-        <typescript-interface>
         interface Response {
           valid: boolean;
           explanation: string;
+          suggestedEmoji?: string;
         }
-        </typescript-interface>
         
-        <example>
         {
           "valid": true,
-          "explanation": "Water can extinguish fire because it cools the fuel and prevents oxygen from reaching the flames."
-        }
-        </example>`,
+          "explanation": "Water can extinguish fire because it cools the fuel and prevents oxygen from reaching the flames.",
+          "suggestedEmoji": "💧"
+        }`,
         data: {
           newObject,
           currentObject: currentObject.textContent
@@ -454,14 +456,15 @@ async function submitObject() {
     });
     const aiData = await aiResponse.json();
     if (aiData.valid) {
+      const displayObject = aiData.suggestedEmoji || newObject;
       currentObject.style.transform = 'scale(0)';
       setTimeout(() => {
-        currentObject.textContent = newObject;
+        currentObject.textContent = displayObject;
         currentObject.style.transform = 'scale(1)';
         animateCurrentObject();
       }, 300);
-      if (!objectRelations[newObject]) {
-        objectRelations[newObject] = {
+      if (!objectRelations[displayObject]) {
+        objectRelations[displayObject] = {
           beats: [],
           beatenBy: []
         };
@@ -472,13 +475,13 @@ async function submitObject() {
           beatenBy: []
         };
       }
-      objectRelations[newObject].beats.push(currentObject.textContent);
-      objectRelations[currentObject.textContent].beatenBy.push(newObject);
-      const existingIndex = usedObjectsArray.findIndex(obj => obj === newObject);
+      objectRelations[displayObject].beats.push(currentObject.textContent);
+      objectRelations[currentObject.textContent].beatenBy.push(displayObject);
+      const existingIndex = usedObjectsArray.findIndex(obj => obj === displayObject);
       if (existingIndex !== -1) {
-        combineEmojiData(newObject, usedObjectsArray[existingIndex]);
+        combineEmojiData(displayObject, usedObjectsArray[existingIndex]);
       } else {
-        usedObjectsArray.push(newObject);
+        usedObjectsArray.push(displayObject);
       }
       updateUsedObjects();
       saveToLocalStorage();
@@ -503,22 +506,21 @@ async function getObjectRelationships(obj1, obj2) {
       body: JSON.stringify({
         prompt: `Analyze the relationship between ${obj1} and ${obj2}.
         Determine which object would win in a conflict and why.
+        Be generous in considering logical relationships - if there's a reasonable way one could beat the other, allow it.
+        Consider size, strength, abilities, natural properties, and creative interactions.
+        Think broadly about how objects could affect each other.
         
-        <typescript-interface>
         interface Response {
           winner: string;
-          loser: string;
+          loser: string; 
           explanation: string;
         }
-        </typescript-interface>
         
-        <example>
         {
           "winner": "scissors",
           "loser": "paper",
           "explanation": "Scissors can cut through paper, making them the winner in this matchup."
-        }
-        </example>`,
+        }`,
         data: {
           object1: obj1,
           object2: obj2
