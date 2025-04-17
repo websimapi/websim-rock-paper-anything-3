@@ -1,4 +1,6 @@
-<html><head><base href="https://rock-paper-anything.games/">
+<html>
+<head>
+<base href="https://rock-paper-anything.games/">
 <title>&#x26f0;&#xfe0f;&#x1f4c4;&#x2753; Rock Paper Anything</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
@@ -67,6 +69,10 @@ button {
 }
 button:hover {
   background-color: #FF9A8B;
+}
+button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
 }
 #result {
   margin-top: 20px;
@@ -164,9 +170,16 @@ button:hover {
   font-size: 24px;
   cursor: pointer;
   transition: transform 0.2s;
+  padding: 10px;
+  border-radius: 5px;
 }
 .emoji-option:hover {
   transform: scale(1.2);
+  background-color: rgba(255, 154, 139, 0.2);
+}
+.emoji-option.selected {
+  border: 2px solid #FF6A88;
+  background-color: rgba(255, 154, 139, 0.3);
 }
 #start-game, #play-now {
   margin-top: 20px;
@@ -259,7 +272,7 @@ button:hover {
     <div class="emoji-option" data-emoji="&#x1f680;">&#x1f680;</div>
   </div>
   
-  <button id="start-game">Start New Game</button>
+  <button id="start-game" disabled>Start New Game</button>
   <button id="play-now">Play with Saved Objects</button>
 
   <div id="game-area">
@@ -274,7 +287,7 @@ button:hover {
   </div>
 
   <div id="play-mode-area">
-    <div id="computer-object">Computer&apos;s Object: </div>
+    <div id="computer-object">Computer's Object: </div>
     <div id="player-objects">Your Objects: </div>
     <div id="play-result"></div>
   </div>
@@ -298,13 +311,13 @@ button:hover {
 <div id="tutorial">
   <div class="tutorial-content">
     <h2>How to Play Rock Paper Anything</h2>
-    <p>Welcome to Rock Paper Anything, where creativity meets logic! Here&apos;s how to play:</p>
+    <p>Welcome to Rock Paper Anything, where creativity meets logic! Here's how to play:</p>
     <ul>
       <li>Start by selecting an emoji from the options provided or use your saved objects.</li>
       <li>Once the game begins, look at the current object displayed.</li>
       <li>Think of something that could logically beat that object.</li>
       <li>Type your answer in the input field. It can be an emoji or a word.</li>
-      <li>Click &quot;Beat It!&quot; or press Enter to submit your answer.</li>
+      <li>Click "Beat It!" or press Enter to submit your answer.</li>
       <li>Our AI will evaluate if your object can logically beat the current one.</li>
       <li>If your answer is accepted, you win the round!</li>
       <li>The game continues with your object becoming the new one to beat.</li>
@@ -312,10 +325,10 @@ button:hover {
     </ul>
     <p>Play Mode:</p>
     <ul>
-      <li>Click the &quot;Play Mode&quot; button to start a game with your created objects.</li>
+      <li>Click the "Play Mode" button to start a game with your created objects.</li>
       <li>The computer will randomly select an object from your list.</li>
-      <li>Choose one of your objects to beat the computer&apos;s object.</li>
-      <li>The game will determine the winner based on the relationships you&apos;ve created.</li>
+      <li>Choose one of your objects to beat the computer's object.</li>
+      <li>The game will determine the winner based on the relationships you've created.</li>
     </ul>
     <p>Remember:</p>
     <ul>
@@ -325,11 +338,13 @@ button:hover {
       <li>Your objects are saved locally, allowing you to continue your game later or start a new one with your created objects!</li>
     </ul>
     <p>Example: Rock &#x26f0;&#xfe0f; &#x2192; Dynamite &#x1f4a3; &#x2192; Water &#x1f4a7; &#x2192; Sun &#x2600;&#xfe0f; &#x2192; Black Hole &#x1f573;&#xfe0f;</p>
-    <button id="close-tutorial">Got it, let&apos;s play!</button>
+    <button id="close-tutorial">Got it, let's play!</button>
   </div>
 </div>
 
-<script>const currentObject = document.getElementById('current-object');
+<script>
+// DOM Element References
+const currentObject = document.getElementById('current-object');
 const userInput = document.getElementById('user-input');
 const submitBtn = document.getElementById('submit-btn');
 const result = document.getElementById('result');
@@ -348,29 +363,41 @@ const computerObject = document.getElementById('computer-object');
 const playerObjects = document.getElementById('player-objects');
 const playResult = document.getElementById('play-result');
 const objectDetails = document.getElementById('object-details');
+
+// Game State
 let usedObjectsArray = [];
 let selectedEmoji = '';
 let objectRelations = {};
+let conversationHistory = [];
+
+// Local Storage Functions
 function loadFromLocalStorage() {
   const savedObjects = localStorage.getItem('usedObjects');
   const savedRelations = localStorage.getItem('objectRelations');
+  
   if (savedObjects) {
     usedObjectsArray = JSON.parse(savedObjects);
     updateObjectHistory();
   }
+  
   if (savedRelations) {
     objectRelations = JSON.parse(savedRelations);
   }
+  
   updateObjectDetails();
 }
+
 function saveToLocalStorage() {
   localStorage.setItem('usedObjects', JSON.stringify(usedObjectsArray));
   localStorage.setItem('objectRelations', JSON.stringify(objectRelations));
   updateObjectHistory();
   updateObjectDetails();
 }
+
+// UI Update Functions
 function updateObjectHistory() {
   objectHistory.innerHTML = '<h3>Object History:</h3>';
+  
   usedObjectsArray.forEach((obj, index) => {
     const historyItem = document.createElement('div');
     historyItem.className = 'history-item';
@@ -381,8 +408,10 @@ function updateObjectHistory() {
     objectHistory.appendChild(historyItem);
   });
 }
+
 function updateObjectDetails() {
   objectDetails.innerHTML = '<h3>Object Details:</h3>';
+  
   for (let obj in objectRelations) {
     const detailItem = document.createElement('div');
     detailItem.innerHTML = `<strong>${obj}</strong>:<br>
@@ -391,25 +420,55 @@ function updateObjectDetails() {
     objectDetails.appendChild(detailItem);
   }
 }
+
+function updateUsedObjects() {
+  usedObjects.textContent = 'Used objects: ' + usedObjectsArray.join(', ');
+}
+
+// Object Management Functions
 function deleteObject(index) {
   const deletedObject = usedObjectsArray[index];
   usedObjectsArray.splice(index, 1);
   delete objectRelations[deletedObject];
+  
   for (let obj in objectRelations) {
     objectRelations[obj].beats = objectRelations[obj].beats.filter(item => item !== deletedObject);
     objectRelations[obj].beatenBy = objectRelations[obj].beatenBy.filter(item => item !== deletedObject);
   }
+  
   saveToLocalStorage();
 }
-function updateUsedObjects() {
-  usedObjects.textContent = 'Used objects: ' + usedObjectsArray.join(', ');
+
+function combineEmojiData(newEmoji, existingEmoji) {
+  // Combine the relationships for duplicate emojis
+  if (!objectRelations[newEmoji]) {
+    objectRelations[newEmoji] = { beats: [], beatenBy: [] };
+  }
+  
+  if (objectRelations[existingEmoji]) {
+    // Merge 'beats' and 'beatenBy' arrays without duplicates
+    objectRelations[existingEmoji].beats.forEach(beaten => {
+      if (!objectRelations[newEmoji].beats.includes(beaten)) {
+        objectRelations[newEmoji].beats.push(beaten);
+      }
+    });
+    
+    objectRelations[existingEmoji].beatenBy.forEach(beater => {
+      if (!objectRelations[newEmoji].beatenBy.includes(beater)) {
+        objectRelations[newEmoji].beatenBy.push(beater);
+      }
+    });
+  }
 }
+
+// Animation Functions
 function animateCurrentObject() {
   currentObject.style.animation = 'bounce 1s';
   setTimeout(() => {
     currentObject.style.animation = '';
   }, 1000);
 }
+
 function showResult(message, isLoading = false) {
   result.innerHTML = isLoading ? '<div class="loading"></div>' : message;
   result.style.opacity = '0';
@@ -417,72 +476,120 @@ function showResult(message, isLoading = false) {
     result.style.opacity = '1';
   }, 100);
 }
+
+// AI Interaction Functions
+async function evaluateObjects(newObject, currentObj) {
+  try {
+    showResult('', true);
+    
+    const completion = await websim.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content: `You are the judge in a creative game called "Rock Paper Anything" where players suggest objects that can beat other objects.
+          Your task is to evaluate if the new object can logically beat the current object.
+          Be generous in allowing logical relationships - if there's any reasonable way the new object could beat the current one, allow it.
+          Consider real world physics, properties, and creative logical relationships.
+          Think broadly about how objects could interact, considering size, strength, abilities, and natural properties.
+          Be lenient and creative in your judgments - the goal is to keep the game fun while maintaining some logic.`
+        },
+        {
+          role: "user",
+          content: `Evaluate if "${newObject}" can logically beat "${currentObj}".
+          Provide your answer in JSON format with the following fields:
+          - valid: boolean indicating if the new object can beat the current one
+          - explanation: detailed explanation of why it works or doesn't work
+          - suggestedEmoji: an appropriate emoji representation for the new object (if text was entered)`
+        }
+      ],
+      json: true
+    });
+    
+    return JSON.parse(completion.content);
+  } catch (error) {
+    console.error("Error evaluating objects:", error);
+    return { valid: false, explanation: "An error occurred during evaluation. Please try again." };
+  }
+}
+
+async function getObjectRelationships(obj1, obj2) {
+  try {
+    const completion = await websim.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content: `You are the judge in a creative game called "Rock Paper Anything" where objects compete against each other.
+          Your task is to determine which object would win in a conflict between the two objects and explain why.
+          Be generous in considering logical relationships - if there's a reasonable way one could beat the other, allow it.
+          Think creatively about how objects could interact, considering all possible properties and relationships.`
+        },
+        {
+          role: "user",
+          content: `Analyze the relationship between "${obj1}" and "${obj2}".
+          Determine which object would win in a conflict and explain why.
+          Provide your answer in JSON format with the following fields:
+          - winner: the object that would win
+          - loser: the object that would lose
+          - explanation: detailed explanation of why the winner beats the loser`
+        }
+      ],
+      json: true
+    });
+    
+    return JSON.parse(completion.content);
+  } catch (error) {
+    console.error("Error getting relationship:", error);
+    return null;
+  }
+}
+
+// Game Logic Functions
 async function submitObject() {
   const newObject = userInput.value.trim();
   if (!newObject) return;
-  showResult('', true);
+  
   submitBtn.disabled = true;
+  
   try {
-    const aiResponse = await fetch('/api/ai_completion', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        prompt: `Evaluate if ${newObject} can logically beat ${currentObject.textContent}.
-        Consider real world physics, properties, and logical relationships.
-        Be generous in allowing logical relationships - if there's any reasonable way it could work, allow it.
-        Think creatively about how objects could interact.
-        Consider size, strength, abilities, and natural properties.
-        Respond with explanation of why it works or doesn't work.
-        Also suggest an appropriate emoji to represent the object if text was entered.
-        
-        interface Response {
-          valid: boolean;
-          explanation: string;
-          suggestedEmoji?: string;
-        }
-        
-        {
-          "valid": true,
-          "explanation": "Water can extinguish fire because it cools the fuel and prevents oxygen from reaching the flames.",
-          "suggestedEmoji": "💧"
-        }`,
-        data: {
-          newObject,
-          currentObject: currentObject.textContent
-        }
-      })
-    });
-    const aiData = await aiResponse.json();
+    const aiData = await evaluateObjects(newObject, currentObject.textContent);
+    
     if (aiData.valid) {
       const displayObject = aiData.suggestedEmoji || newObject;
+      
+      // Animate object change
       currentObject.style.transform = 'scale(0)';
       setTimeout(() => {
         currentObject.textContent = displayObject;
         currentObject.style.transform = 'scale(1)';
         animateCurrentObject();
       }, 300);
+      
+      // Update object relationships
       if (!objectRelations[displayObject]) {
         objectRelations[displayObject] = {
           beats: [],
           beatenBy: []
         };
       }
+      
       if (!objectRelations[currentObject.textContent]) {
         objectRelations[currentObject.textContent] = {
           beats: [],
           beatenBy: []
         };
       }
+      
       objectRelations[displayObject].beats.push(currentObject.textContent);
       objectRelations[currentObject.textContent].beatenBy.push(displayObject);
+      
+      // Check if object already exists and combine data if needed
       const existingIndex = usedObjectsArray.findIndex(obj => obj === displayObject);
       if (existingIndex !== -1) {
         combineEmojiData(displayObject, usedObjectsArray[existingIndex]);
       } else {
         usedObjectsArray.push(displayObject);
       }
+      
       updateUsedObjects();
       saveToLocalStorage();
       showResult(aiData.explanation);
@@ -493,46 +600,11 @@ async function submitObject() {
     console.error('Error:', error);
     showResult('An error occurred. Please try again.');
   }
+  
   userInput.value = '';
   submitBtn.disabled = false;
 }
-async function getObjectRelationships(obj1, obj2) {
-  try {
-    const response = await fetch('/api/ai_completion', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        prompt: `Analyze the relationship between ${obj1} and ${obj2}.
-        Determine which object would win in a conflict and why.
-        Be generous in considering logical relationships - if there's a reasonable way one could beat the other, allow it.
-        Consider size, strength, abilities, natural properties, and creative interactions.
-        Think broadly about how objects could affect each other.
-        
-        interface Response {
-          winner: string;
-          loser: string; 
-          explanation: string;
-        }
-        
-        {
-          "winner": "scissors",
-          "loser": "paper",
-          "explanation": "Scissors can cut through paper, making them the winner in this matchup."
-        }`,
-        data: {
-          object1: obj1,
-          object2: obj2
-        }
-      })
-    });
-    return await response.json();
-  } catch (error) {
-    console.error('Error getting relationship:', error);
-    return null;
-  }
-}
+
 async function playRound(playerObj, computerObj) {
   if (objectRelations[playerObj] && objectRelations[playerObj].beats.includes(computerObj)) {
     playResult.textContent = `You win! ${playerObj} beats ${computerObj}`;
@@ -541,6 +613,7 @@ async function playRound(playerObj, computerObj) {
   } else {
     playResult.textContent = "Analyzing matchup...";
     const relationship = await getObjectRelationships(playerObj, computerObj);
+    
     if (relationship) {
       if (relationship.winner === playerObj) {
         playResult.textContent = `You win! ${relationship.explanation}`;
@@ -553,7 +626,7 @@ async function playRound(playerObj, computerObj) {
         playResult.textContent = `You lose! ${relationship.explanation}`;
         if (!objectRelations[computerObj].beats.includes(playerObj)) {
           objectRelations[computerObj].beats.push(playerObj);
-          objectRelations[playerObj].beatenBy.push(computerObj);
+          objectRelations[playerObj].beatenBy.push(playerObj);
           saveToLocalStorage();
         }
       }
@@ -561,16 +634,25 @@ async function playRound(playerObj, computerObj) {
       playResult.textContent = "It's a tie! No clear winner.";
     }
   }
+  
   setTimeout(startPlayMode, 3000);
 }
+
 function startPlayMode() {
+  if (usedObjectsArray.length < 2) {
+    alert("You need at least 2 objects to play. Please create more objects first.");
+    return;
+  }
+  
   gameArea.style.display = 'none';
   playModeArea.style.display = 'block';
   emojiSelector.style.display = 'none';
   startGameBtn.style.display = 'none';
   playNowBtn.style.display = 'none';
+  
   const computerSelection = usedObjectsArray[Math.floor(Math.random() * usedObjectsArray.length)];
   computerObject.textContent = `Computer's Object: ${computerSelection}`;
+  
   playerObjects.innerHTML = 'Your Objects: ';
   usedObjectsArray.forEach(obj => {
     const objButton = document.createElement('button');
@@ -579,18 +661,25 @@ function startPlayMode() {
     objButton.onclick = () => playRound(obj, computerSelection);
     playerObjects.appendChild(objButton);
   });
+  
   playResult.textContent = '';
 }
+
+// Event Listeners
 emojiSelector.addEventListener('click', e => {
   if (e.target.classList.contains('emoji-option')) {
-    selectedEmoji = e.target.dataset.emoji;
+    // Clear previous selection
     emojiSelector.querySelectorAll('.emoji-option').forEach(option => {
-      option.style.border = 'none';
+      option.classList.remove('selected');
     });
-    e.target.style.border = '2px solid #FF6A88';
+    
+    // Set new selection
+    selectedEmoji = e.target.dataset.emoji;
+    e.target.classList.add('selected');
     startGameBtn.disabled = false;
   }
 });
+
 startGameBtn.addEventListener('click', () => {
   if (selectedEmoji) {
     emojiSelector.style.display = 'none';
@@ -598,21 +687,26 @@ startGameBtn.addEventListener('click', () => {
     playNowBtn.style.display = 'none';
     gameArea.style.display = 'block';
     playModeArea.style.display = 'none';
+    
     currentObject.textContent = selectedEmoji;
+    
     if (!usedObjectsArray.includes(selectedEmoji)) {
       usedObjectsArray.push(selectedEmoji);
     }
+    
     if (!objectRelations[selectedEmoji]) {
       objectRelations[selectedEmoji] = {
         beats: [],
         beatenBy: []
       };
     }
+    
     updateUsedObjects();
     saveToLocalStorage();
     animateCurrentObject();
   }
 });
+
 playNowBtn.addEventListener('click', () => {
   if (usedObjectsArray.length > 0) {
     emojiSelector.style.display = 'none';
@@ -620,6 +714,7 @@ playNowBtn.addEventListener('click', () => {
     playNowBtn.style.display = 'none';
     gameArea.style.display = 'block';
     playModeArea.style.display = 'none';
+    
     currentObject.textContent = usedObjectsArray[usedObjectsArray.length - 1];
     updateUsedObjects();
     animateCurrentObject();
@@ -627,28 +722,40 @@ playNowBtn.addEventListener('click', () => {
     alert('No saved objects found. Please start a new game.');
   }
 });
+
 submitBtn.addEventListener('click', submitObject);
+
 userInput.addEventListener('keypress', e => {
   if (e.key === 'Enter') {
     submitObject();
   }
 });
+
 showTutorial.addEventListener('click', e => {
   e.preventDefault();
   tutorial.style.display = 'flex';
 });
+
 closeTutorial.addEventListener('click', () => {
   tutorial.style.display = 'none';
 });
+
 objectHistory.addEventListener('click', e => {
   if (e.target.classList.contains('delete-object')) {
     const index = parseInt(e.target.dataset.index);
     deleteObject(index);
   }
 });
+
 playModeBtn.addEventListener('click', startPlayMode);
-startGameBtn.disabled = true;
-loadFromLocalStorage();</script>
+
+// Initialize
+loadFromLocalStorage();
+
+// Check if there are saved objects to enable/disable the Play Now button
+playNowBtn.disabled = usedObjectsArray.length === 0;
+</script>
 
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4c6229722a6346bc8eb5cb0e5eae5d41","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-</body></html>
+</body>
+</html>
