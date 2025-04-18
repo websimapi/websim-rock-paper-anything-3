@@ -10,6 +10,7 @@ body, html {
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow-x: hidden;
 }
 
 .game-container {
@@ -18,12 +19,11 @@ body, html {
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.3), 0 0 100px rgba(52, 152, 219, 0.2);
   text-align: center;
-  width: 90%;
-  max-width: 600px;
-  height: 90vh;
+  width: 95%;
+  max-width: 1200px;
+  height: 95vh;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   overflow-y: auto;
   position: relative;
   border: 8px solid #34495e;
@@ -31,9 +31,31 @@ body, html {
 
 h1 {
   color: #2c3e50;
-  font-size: 2.5em;
-  margin-bottom: 20px;
+  font-size: 2.8em;
+  margin-bottom: 15px;
+  margin-top: 10px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.game-content {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.main-column {
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+}
+
+.side-column {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 #current-object {
@@ -55,6 +77,10 @@ h1 {
 .input-group {
   display: flex;
   margin-bottom: 20px;
+  max-width: 500px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 input[type="text"] {
@@ -120,6 +146,9 @@ button:disabled {
   border-radius: 10px;
   background-color: #eaf2f8;
   color: #2c3e50;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 #used-objects {
@@ -129,15 +158,19 @@ button:disabled {
   background-color: #f8f9fa;
   border-radius: 10px;
   border-left: 5px solid #3498db;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .links {
-  margin-top: 30px;
+  margin-top: 20px;
   display: flex;
   justify-content: space-around;
   background-color: #34495e;
-  padding: 15px;
+  padding: 12px;
   border-radius: 10px;
+  width: 100%;
 }
 
 .links a {
@@ -246,6 +279,9 @@ button:disabled {
   padding: 15px;
   border-radius: 15px;
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .emoji-option {
@@ -286,6 +322,7 @@ button:disabled {
   font-size: 18px;
   transition: all 0.3s;
   width: 70%;
+  max-width: 400px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -301,53 +338,43 @@ button:disabled {
   padding: 20px;
   border-radius: 15px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  margin-top: 20px;
+  margin-top: 0;
   border: 3px solid #3498db;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 #object-history, #object-details {
-  margin-top: 25px;
   text-align: left;
   background-color: #f8f9fa;
   padding: 15px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  max-height: 200px;
   overflow-y: auto;
   scrollbar-width: thin;
-  border-left: 5px solid #3498db;
-  width: 48%;
-  display: inline-block;
-  vertical-align: top;
-  min-height: 200px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
 }
 
 #object-history {
-  margin-right: 2%;
   border-left: 5px solid #27ae60;
 }
 
 #object-details {
-  margin-left: 2%;
   border-left: 5px solid #e74c3c;
 }
 
 .objects-container {
   display: flex;
-  justify-content: space-between;
-  margin-top: 25px;
+  flex-direction: column;
   width: 100%;
-}
-
-@media (max-width: 768px) {
-  #object-history, #object-details {
-    width: 100%;
-    margin: 15px 0;
-  }
-  
-  .objects-container {
-    flex-direction: column;
-  }
+  height: 100%;
+  gap: 20px;
 }
 
 #player-objects, #computer-object {
@@ -549,4 +576,34 @@ button:disabled {
 
 .delete-object:hover {
   background-color: #c0392b;
+}
+
+@media (max-width: 1024px) {
+  .game-content {
+    flex-direction: column;
+  }
+  
+  .side-column {
+    flex-direction: row;
+  }
+  
+  #object-history, #object-details {
+    min-height: 200px;
+    flex: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .side-column {
+    flex-direction: column;
+  }
+  
+  #object-history, #object-details {
+    min-height: 150px;
+  }
+  
+  .game-container {
+    height: auto;
+    min-height: 95vh;
+  }
 }

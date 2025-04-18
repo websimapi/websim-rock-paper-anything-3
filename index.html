@@ -28,31 +28,35 @@
   <button id="start-game" disabled>🎮 Start New Game</button>
   <button id="play-now">🏆 Play with Your Collection</button>
 
-  <div class="objects-container">
-    <div id="object-history">
-      <h3>🏆 Your Collection:</h3>
+  <div class="game-content">
+    <div class="main-column">
+      <div id="game-area">
+        <p>Create an object that beats:</p>
+        <div id="current-object"></div>
+        <div class="input-group">
+          <input type="text" id="user-input" placeholder="Type an emoji or word" required>
+          <button id="submit-btn">Beat It! 💪</button>
+        </div>
+        <div id="result"></div>
+        <div id="used-objects"></div>
+      </div>
+
+      <div id="play-mode-area">
+        <div id="computer-object">Computer's Object: </div>
+        <div id="player-objects">Your Objects: </div>
+        <div id="play-result"></div>
+      </div>
     </div>
 
-    <div id="object-details">
-      <h3>⚔️ Object Relationships:</h3>
-    </div>
-  </div>
+    <div class="side-column">
+      <div id="object-history">
+        <h3>🏆 Your Collection:</h3>
+      </div>
 
-  <div id="game-area">
-    <p>Create an object that beats:</p>
-    <div id="current-object"></div>
-    <div class="input-group">
-      <input type="text" id="user-input" placeholder="Type an emoji or word" required>
-      <button id="submit-btn">Beat It! 💪</button>
+      <div id="object-details">
+        <h3>⚔️ Object Relationships:</h3>
+      </div>
     </div>
-    <div id="result"></div>
-    <div id="used-objects"></div>
-  </div>
-
-  <div id="play-mode-area">
-    <div id="computer-object">Computer's Object: </div>
-    <div id="player-objects">Your Objects: </div>
-    <div id="play-result"></div>
   </div>
 
   <div class="links">
