@@ -24,6 +24,7 @@ let usedObjectsArray = [];
 let selectedEmoji = '';
 let objectRelations = {};
 let conversationHistory = [];
+let room; // WebsimSocket instance
 
 // Local Storage Functions
 function loadFromLocalStorage() {
@@ -320,6 +321,102 @@ function startPlayMode() {
   playResult.textContent = '';
 }
 
+async function initializeMultiplayer() {
+  room = new WebsimSocket();
+  
+  try {
+    await room.initialize();
+    console.log("Multiplayer initialized, client ID:", room.clientId);
+    
+    // Subscribe to presence updates
+    room.subscribePresence((presenceData) => {
+      console.log("Presence updated:", presenceData);
+      
+      // Check if someone joined our battle
+      if (room.roomState.battleActive && room.roomState.battleInitiator === room.clientId) {
+        const opponents = Object.keys(presenceData).filter(id => 
+          id !== room.clientId && 
+          presenceData[id].inBattle && 
+          presenceData[id].opponentId === room.clientId
+        );
+        
+        if (opponents.length > 0) {
+          // We have an opponent
+          const opponentId = opponents[0];
+          console.log("Opponent joined:", opponentId);
+          
+          // Update UI to show opponent joined
+          if (computerObject.textContent.includes("Waiting")) {
+            computerObject.textContent = `Opponent has joined! They are choosing their object...`;
+            playerObjects.innerHTML = 'Choose your object: ';
+            
+            // Display the available objects
+            room.roomState.availableObjects.forEach(obj => {
+              const objButton = document.createElement('button');
+              objButton.className = 'player-object-btn';
+              objButton.textContent = obj;
+              objButton.onclick = () => selectObjectForMultiplayerBattle(obj);
+              playerObjects.appendChild(objButton);
+            });
+            
+            playResult.textContent = 'Make your selection. Your opponent will not see your choice until both players have chosen.';
+          }
+        }
+      }
+    });
+    
+    // Subscribe to room state updates
+    room.subscribeRoomState((roomState) => {
+      console.log("Room state updated:", roomState);
+      
+      // Check if both players have selected an object
+      if (roomState.battleActive && roomState.playerSelections) {
+        const selections = roomState.playerSelections;
+        const playerIds = Object.keys(selections);
+        
+        if (playerIds.length === 2) {
+          // Both players have made selections
+          const mySelection = selections[room.clientId];
+          const opponentId = playerIds.find(id => id !== room.clientId);
+          const opponentSelection = selections[opponentId];
+          
+          if (mySelection && opponentSelection) {
+            console.log("Both players have selected:", mySelection, opponentSelection);
+            
+            // Resolve the battle
+            resolveBattle(mySelection, opponentSelection, opponentId);
+          }
+        }
+      }
+    });
+    
+    // Handle messages
+    room.onmessage = (event) => {
+      const data = event.data;
+      console.log("Received message:", data);
+      
+      switch (data.type) {
+        case "battleJoined":
+          if (room.roomState.battleInitiator === room.clientId) {
+            console.log("Player joined our battle:", data.joinerId);
+          }
+          break;
+          
+        case "battleResult":
+          console.log("Battle result:", data);
+          // Already handled by resolveBattle function
+          break;
+          
+        default:
+          console.log("Unknown message type:", data.type);
+      }
+    };
+    
+  } catch (error) {
+    console.error("Failed to initialize multiplayer:", error);
+  }
+}
+
 // Event Listeners
 emojiSelector.addEventListener('click', e => {
   if (e.target.classList.contains('emoji-option')) {
@@ -406,6 +503,7 @@ playModeBtn.addEventListener('click', startPlayMode);
 
 // Initialize
 loadFromLocalStorage();
+initializeMultiplayer();
 
 // Check if there are saved objects to enable/disable the Play Now button
 playNowBtn.disabled = usedObjectsArray.length === 0;

@@ -12,7 +12,8 @@ async function evaluateObjects(newObject, currentObj) {
           Be generous in allowing logical relationships - if there's any reasonable way the new object could beat the current one, allow it.
           Consider real world physics, properties, and creative logical relationships.
           Think broadly about how objects could interact, considering size, strength, abilities, and natural properties.
-          Be lenient and creative in your judgments - the goal is to keep the game fun while maintaining some logic.`
+          Be very lenient and creative in your judgments - the goal is to keep the game fun by accepting reasonable connections.
+          Only reject completely illogical or nonsensical relationships.`
         },
         {
           role: "user",
@@ -41,8 +42,9 @@ async function getObjectRelationships(obj1, obj2) {
           role: "system",
           content: `You are the judge in a creative game called "Rock Paper Anything" where objects compete against each other.
           Your task is to determine which object would win in a conflict between the two objects and explain why.
-          Be generous in considering logical relationships - if there's a reasonable way one could beat the other, allow it.
-          Think creatively about how objects could interact, considering all possible properties and relationships.`
+          Be generous and creative in considering logical relationships - if there's a reasonable way one could beat the other, allow it.
+          Think creatively about how objects could interact, considering all possible properties and relationships.
+          Be lenient with your judgments - the goal is to make the game fun and interesting.`
         },
         {
           role: "user",
