@@ -10,7 +10,10 @@
 <div class="game-container">
   <h1>&#x26f0;&#xfe0f;&#x1f4c4;&#x2753; Rock Paper Anything</h1>
   
-  <button id="play-mode-btn">⚔️ Battle Mode</button>
+  <div class="mode-buttons">
+    <button id="play-mode-btn">⚔️ Battle Mode</button>
+    <button id="realtime-mode-btn">🌐 Realtime Mode</button>
+  </div>
 
   <div id="emoji-selector">
     <div class="emoji-option" data-emoji="&#x26f0;&#xfe0f;">&#x26f0;&#xfe0f;</div>
@@ -45,6 +48,115 @@
         <div id="computer-object">Computer's Object: </div>
         <div id="player-objects">Your Objects: </div>
         <div id="play-result"></div>
+      </div>
+      
+      <!-- New realtime mode area -->
+      <div id="realtime-mode-area">
+        <div class="realtime-tabs">
+          <button class="realtime-tab-btn active" data-tab="host">Host Game</button>
+          <button class="realtime-tab-btn" data-tab="join">Join Game</button>
+        </div>
+        
+        <div class="realtime-tab-content" id="host-tab">
+          <h3>Host a Game</h3>
+          <div class="settings-group">
+            <label>Timer:</label>
+            <select id="timer-setting">
+              <option value="5">5 seconds</option>
+              <option value="15" selected>15 seconds</option>
+              <option value="30">30 seconds</option>
+            </select>
+          </div>
+          <div class="settings-group">
+            <label>Best of:</label>
+            <select id="best-of-setting">
+              <option value="1">1 Round</option>
+              <option value="3" selected>3 Rounds</option>
+              <option value="5">5 Rounds</option>
+              <option value="7">7 Rounds</option>
+              <option value="custom">Custom</option>
+            </select>
+            <input type="number" id="custom-rounds" min="1" max="99" value="9" class="hidden">
+          </div>
+          <button id="create-room-btn" class="primary-btn">Create Room</button>
+        </div>
+        
+        <div class="realtime-tab-content hidden" id="join-tab">
+          <h3>Join a Game</h3>
+          <div id="room-list">
+            <p class="empty-message">Looking for rooms...</p>
+          </div>
+          <button id="refresh-rooms-btn">🔄 Refresh</button>
+        </div>
+        
+        <div id="lobby-area" class="hidden">
+          <h3>Game Lobby</h3>
+          <div class="lobby-info">
+            <p>Room Code: <span id="room-code">XXXX</span></p>
+            <p>Host: <span id="host-name">Waiting...</span></p>
+            <p>Settings: Best of <span id="rounds-display">3</span>, <span id="timer-display">15</span> seconds per turn</p>
+          </div>
+          
+          <div class="players-container">
+            <div class="player-card" id="player-self">
+              <div class="player-avatar"></div>
+              <div class="player-name">You</div>
+              <div class="player-status">Waiting</div>
+              <button id="ready-btn" class="primary-btn">Ready</button>
+            </div>
+            <div class="player-card" id="player-opponent">
+              <div class="player-avatar"></div>
+              <div class="player-name">Waiting for opponent...</div>
+              <div class="player-status">Not connected</div>
+            </div>
+          </div>
+          
+          <button id="leave-lobby-btn">Leave Lobby</button>
+        </div>
+        
+        <div id="game-match-area" class="hidden">
+          <div class="match-info">
+            <div class="score-display">
+              <span id="player-score">0</span> - <span id="opponent-score">0</span>
+            </div>
+            <div class="round-info">
+              Round <span id="current-round">1</span> of <span id="total-rounds">3</span>
+            </div>
+            <div class="timer-display">
+              <span id="countdown-timer">15</span>s
+            </div>
+          </div>
+          
+          <div class="match-area">
+            <div class="player-selection">
+              <h4>Your Selection</h4>
+              <div id="player-selected-object">?</div>
+            </div>
+            <div class="versus-indicator">VS</div>
+            <div class="opponent-selection">
+              <h4>Opponent's Selection</h4>
+              <div id="opponent-selected-object">?</div>
+            </div>
+          </div>
+          
+          <div id="selection-container">
+            <h4>Choose your object:</h4>
+            <div id="player-objects-grid"></div>
+          </div>
+          
+          <div id="round-result" class="hidden">
+            <h3 id="result-message">You Win!</h3>
+            <p id="result-explanation"></p>
+            <button id="next-round-btn" class="primary-btn">Next Round</button>
+          </div>
+          
+          <div id="match-result" class="hidden">
+            <h2 id="match-result-title">Victory!</h2>
+            <div id="final-score"></div>
+            <button id="rematch-btn" class="primary-btn">Rematch</button>
+            <button id="exit-match-btn">Exit to Lobby</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -103,6 +215,7 @@
 <script src="aiService.js"></script>
 <script src="uiHandler.js"></script>
 <script src="gameLogic.js"></script>
+<script src="realtimeMode.js"></script>
 <script src="main.js"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4c6229722a6346bc8eb5cb0e5eae5d41","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
