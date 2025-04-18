@@ -4,12 +4,13 @@
 <base href="https://rock-paper-anything.games/">
 <title>&#x26f0;&#xfe0f;&#x1f4c4;&#x2753; Rock Paper Anything</title>
 <link rel="stylesheet" href="styles.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 <div class="game-container">
   <h1>&#x26f0;&#xfe0f;&#x1f4c4;&#x2753; Rock Paper Anything</h1>
   
-  <button id="play-mode-btn">Play Mode</button>
+  <button id="play-mode-btn">⚔️ Battle Mode</button>
 
   <div id="emoji-selector">
     <div class="emoji-option" data-emoji="&#x26f0;&#xfe0f;">&#x26f0;&#xfe0f;</div>
@@ -24,15 +25,15 @@
     <div class="emoji-option" data-emoji="&#x1f680;">&#x1f680;</div>
   </div>
   
-  <button id="start-game" disabled>Start New Game</button>
-  <button id="play-now">Play with Saved Objects</button>
+  <button id="start-game" disabled>🎮 Start New Game</button>
+  <button id="play-now">🏆 Play with Your Collection</button>
 
   <div id="game-area">
-    <p>Enter a Thing that beats the current object:</p>
+    <p>Create an object that beats:</p>
     <div id="current-object"></div>
     <div class="input-group">
       <input type="text" id="user-input" placeholder="Type an emoji or word" required>
-      <button id="submit-btn">Beat It!</button>
+      <button id="submit-btn">Beat It! 💪</button>
     </div>
     <div id="result"></div>
     <div id="used-objects"></div>
@@ -44,62 +45,18 @@
     <div id="play-result"></div>
   </div>
 
-  <div id="leaderboard-area">
-    <div class="leaderboard-header">
-      <h2>🏆 Leaderboard</h2>
-      <button id="back-to-game">Back to Game</button>
-    </div>
-    
-    <div class="stat-cards">
-      <div class="stat-card">
-        <h3>Your Wins</h3>
-        <div class="value" id="player-wins">0</div>
-      </div>
-      <div class="stat-card">
-        <h3>Your Rank</h3>
-        <div class="value" id="player-rank">#-</div>
-      </div>
-      <div class="stat-card">
-        <h3>Total Players</h3>
-        <div class="value" id="total-players">0</div>
-      </div>
-    </div>
-    
-    <table class="leaderboard-table" id="leaderboard-table">
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Player</th>
-          <th>Wins</th>
-          <th>Losses</th>
-          <th>Win Rate</th>
-        </tr>
-      </thead>
-      <tbody id="leaderboard-body">
-        <tr>
-          <td colspan="5">Loading leaderboard data...</td>
-        </tr>
-      </tbody>
-    </table>
-    
-    <div id="recent-matches">
-      <h3>Recent Matches</h3>
-      <div class="loading">Loading recent matches...</div>
-    </div>
-  </div>
-
   <div id="object-history">
-    <h3>Object History:</h3>
+    <h3>🏆 Your Collection:</h3>
   </div>
 
   <div id="object-details">
-    <h3>Object Details:</h3>
+    <h3>⚔️ Object Relationships:</h3>
   </div>
 
   <div class="links">
     <a href="/rules">&#x1f4dc; Rules</a>
     <a href="/about">&#x2139;&#xfe0f; About</a>
-    <a href="#" id="leaderboard-link">&#x1f3c6; Leaderboard</a>
+    <a href="/leaderboard">&#x1f3c6; Leaderboard</a>
     <a href="#" id="show-tutorial">&#x2753; How to Play</a>
   </div>
 </div>
@@ -107,31 +64,28 @@
 <div id="tutorial">
   <div class="tutorial-content">
     <h2>How to Play Rock Paper Anything</h2>
-    <p>Welcome to Rock Paper Anything, where creativity meets logic! Here's how to play:</p>
+    <p>Welcome to Rock Paper Anything, where creativity meets strategy!</p>
     <ul>
-      <li>Start by selecting an emoji from the options provided or use your saved objects.</li>
-      <li>Once the game begins, look at the current object displayed.</li>
-      <li>Think of something that could logically beat that object.</li>
-      <li>Type your answer in the input field. It can be an emoji or a word.</li>
-      <li>Click "Beat It!" or press Enter to submit your answer.</li>
-      <li>Our AI will evaluate if your object can logically beat the current one.</li>
-      <li>If your answer is accepted, you win the round!</li>
-      <li>The game continues with your object becoming the new one to beat.</li>
-      <li>Try to create the longest chain of winning objects!</li>
+      <li>Start by selecting an emoji from the selector to begin your chain.</li>
+      <li>Look at the current object shown in the game area.</li>
+      <li>Think of something that would logically defeat that object!</li>
+      <li>Enter your object (emoji or text) in the input field.</li>
+      <li>Our AI will decide if your object can logically beat the current one.</li>
+      <li>If successful, your object becomes the new one to beat!</li>
+      <li>Try to create the longest chain of winning objects possible.</li>
     </ul>
-    <p>Play Mode:</p>
+    <p>Battle Mode:</p>
     <ul>
-      <li>Click the "Play Mode" button to start a game with your created objects.</li>
-      <li>The computer will randomly select an object from your list.</li>
-      <li>Choose one of your objects to beat the computer's object.</li>
-      <li>The game will determine the winner based on the relationships you've created.</li>
+      <li>Once you've built a collection of objects, click "Battle Mode"</li>
+      <li>The computer will select an object from your collection.</li>
+      <li>Choose one of your objects to counter the computer's choice.</li>
+      <li>Win by selecting objects that have proven relationships!</li>
     </ul>
     <p>Remember:</p>
     <ul>
-      <li>Be creative but logical! The AI will check if your object can realistically beat the current one.</li>
-      <li>Your answer should have a clear and justifiable connection to beating the current object.</li>
-      <li>In Play Mode, you can repeat objects, allowing for more strategic gameplay.</li>
-      <li>Your objects are saved locally, allowing you to continue your game later or start a new one with your created objects!</li>
+      <li>Be creative but logical - the AI evaluates real-world relationships.</li>
+      <li>The more objects you create, the more interesting the game becomes!</li>
+      <li>Your collection is saved locally so you can continue playing later.</li>
     </ul>
     <p>Example: Rock &#x26f0;&#xfe0f; &#x2192; Dynamite &#x1f4a3; &#x2192; Water &#x1f4a7; &#x2192; Sun &#x2600;&#xfe0f; &#x2192; Black Hole &#x1f573;&#xfe0f;</p>
     <button id="close-tutorial">Got it, let's play!</button>
