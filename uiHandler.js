@@ -11,6 +11,11 @@ function updateObjectHistory() {
     return;
   }
   
+  const scrollContainer = document.createElement('div');
+  scrollContainer.style.maxHeight = '150px';
+  scrollContainer.style.overflowY = 'auto';
+  objectHistory.appendChild(scrollContainer);
+  
   usedObjectsArray.forEach((obj, index) => {
     const historyItem = document.createElement('div');
     historyItem.className = 'history-item';
@@ -18,7 +23,7 @@ function updateObjectHistory() {
       <span>${obj} ${getObjectStats(obj)}</span>
       <button class="delete-object" data-index="${index}">🗑️</button>
     `;
-    objectHistory.appendChild(historyItem);
+    scrollContainer.appendChild(historyItem);
   });
 }
 
@@ -43,13 +48,18 @@ function updateObjectDetails() {
     return;
   }
   
+  const scrollContainer = document.createElement('div');
+  scrollContainer.style.maxHeight = '150px';
+  scrollContainer.style.overflowY = 'auto';
+  objectDetails.appendChild(scrollContainer);
+  
   for (let obj in objectRelations) {
     const detailItem = document.createElement('div');
     detailItem.className = 'relationship-item';
     detailItem.innerHTML = `<strong>${obj}</strong>:<br>
       <span style="color: #27ae60;">Beats: ${objectRelations[obj].beats.join(', ') || 'None'}</span><br>
       <span style="color: #e74c3c;">Beaten by: ${objectRelations[obj].beatenBy.join(', ') || 'None'}</span>`;
-    objectDetails.appendChild(detailItem);
+    scrollContainer.appendChild(detailItem);
   }
 }
 

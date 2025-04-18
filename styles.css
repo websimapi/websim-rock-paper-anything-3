@@ -316,66 +316,38 @@ button:disabled {
   overflow-y: auto;
   scrollbar-width: thin;
   border-left: 5px solid #3498db;
+  width: 48%;
+  display: inline-block;
+  vertical-align: top;
+  min-height: 200px;
 }
 
-#object-history h3, #object-details h3 {
-  color: #2c3e50;
-  border-bottom: 2px solid #ecf0f1;
-  padding-bottom: 8px;
-  margin-bottom: 15px;
+#object-history {
+  margin-right: 2%;
+  border-left: 5px solid #27ae60;
 }
 
-.history-item {
+#object-details {
+  margin-left: 2%;
+  border-left: 5px solid #e74c3c;
+}
+
+.objects-container {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  padding: 8px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s;
+  margin-top: 25px;
+  width: 100%;
 }
 
-.history-item:hover {
-  transform: translateX(5px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.delete-object {
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
-}
-
-.delete-object:hover {
-  background-color: #c0392b;
-}
-
-#play-mode-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: #9b59b6;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s;
-}
-
-#play-mode-btn:hover {
-  background-color: #8e44ad;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
+@media (max-width: 768px) {
+  #object-history, #object-details {
+    width: 100%;
+    margin: 15px 0;
+  }
+  
+  .objects-container {
+    flex-direction: column;
+  }
 }
 
 #player-objects, #computer-object {
@@ -524,4 +496,57 @@ button:disabled {
 .relationship-item:hover {
   transform: translateX(5px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#play-mode-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #9b59b6;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s;
+}
+
+#play-mode-btn:hover {
+  background-color: #8e44ad;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 8px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s;
+}
+
+.history-item:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.delete-object {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.delete-object:hover {
+  background-color: #c0392b;
 }
