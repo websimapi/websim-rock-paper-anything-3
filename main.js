@@ -1,3 +1,6 @@
+// Initialize WebsimSocket
+const room = new WebsimSocket();
+
 // DOM Element References
 const currentObject = document.getElementById('current-object');
 const userInput = document.getElementById('user-input');
@@ -18,12 +21,16 @@ const computerObject = document.getElementById('computer-object');
 const playerObjects = document.getElementById('player-objects');
 const playResult = document.getElementById('play-result');
 const objectDetails = document.getElementById('object-details');
+const leaderboardLink = document.getElementById('leaderboard-link');
+const leaderboardArea = document.getElementById('leaderboard-area');
+const backToGameBtn = document.getElementById('back-to-game');
 
 // Game State
 let usedObjectsArray = [];
 let selectedEmoji = '';
 let objectRelations = {};
 let conversationHistory = [];
+let currentPlayerUsername = '';
 
 // Local Storage Functions
 function loadFromLocalStorage() {
@@ -404,8 +411,56 @@ objectHistory.addEventListener('click', e => {
 
 playModeBtn.addEventListener('click', startPlayMode);
 
-// Initialize
-loadFromLocalStorage();
+leaderboardLink.addEventListener('click', (e) => {
+  e.preventDefault();
+  showLeaderboard();
+  // Update URL without refreshing
+  window.history.pushState({}, '', '?view=leaderboard');
+});
 
-// Check if there are saved objects to enable/disable the Play Now button
-playNowBtn.disabled = usedObjectsArray.length === 0;
+backToGameBtn.addEventListener('click', () => {
+  hideLeaderboard();
+  // Update URL without refreshing
+  window.history.pushState({}, '', window.location.pathname);
+});
+
+// Initialize
+async function initialize() {
+  await room.initialize();
+  loadFromLocalStorage();
+  getCurrentUsername();
+  
+  // Check if there are saved objects to enable/disable the Play Now button
+  playNowBtn.disabled = usedObjectsArray.length === 0;
+  
+  // Check if we're on the leaderboard page (from URL parameter)
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('view') === 'leaderboard') {
+    showLeaderboard();
+  }
+}
+
+async function getCurrentUsername() {
+  try {
+    const userInfo = room.peers[room.clientId];
+    if (userInfo && userInfo.username) {
+      currentPlayerUsername = userInfo.username;
+      console.log("Current player username:", currentPlayerUsername);
+    }
+  } catch (error) {
+    console.error("Error getting username:", error);
+    // Use a random name if we can't get the username
+    currentPlayerUsername = "Player_" + Math.floor(Math.random() * 1000);
+  }
+}
+
+function showLeaderboard() {
+  // This function is not defined in the plan
+}
+
+function hideLeaderboard() {
+  // This function is not defined in the plan
+}
+
+// Initialize
+initialize();

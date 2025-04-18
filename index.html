@@ -44,6 +44,50 @@
     <div id="play-result"></div>
   </div>
 
+  <div id="leaderboard-area">
+    <div class="leaderboard-header">
+      <h2>🏆 Leaderboard</h2>
+      <button id="back-to-game">Back to Game</button>
+    </div>
+    
+    <div class="stat-cards">
+      <div class="stat-card">
+        <h3>Your Wins</h3>
+        <div class="value" id="player-wins">0</div>
+      </div>
+      <div class="stat-card">
+        <h3>Your Rank</h3>
+        <div class="value" id="player-rank">#-</div>
+      </div>
+      <div class="stat-card">
+        <h3>Total Players</h3>
+        <div class="value" id="total-players">0</div>
+      </div>
+    </div>
+    
+    <table class="leaderboard-table" id="leaderboard-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Player</th>
+          <th>Wins</th>
+          <th>Losses</th>
+          <th>Win Rate</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboard-body">
+        <tr>
+          <td colspan="5">Loading leaderboard data...</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div id="recent-matches">
+      <h3>Recent Matches</h3>
+      <div class="loading">Loading recent matches...</div>
+    </div>
+  </div>
+
   <div id="object-history">
     <h3>Object History:</h3>
   </div>
@@ -55,7 +99,7 @@
   <div class="links">
     <a href="/rules">&#x1f4dc; Rules</a>
     <a href="/about">&#x2139;&#xfe0f; About</a>
-    <a href="/leaderboard">&#x1f3c6; Leaderboard</a>
+    <a href="#" id="leaderboard-link">&#x1f3c6; Leaderboard</a>
     <a href="#" id="show-tutorial">&#x2753; How to Play</a>
   </div>
 </div>
