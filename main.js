@@ -13,6 +13,7 @@ const playNowBtn = document.getElementById('play-now');
 const gameArea = document.getElementById('game-area');
 const objectHistory = document.getElementById('object-history');
 const playModeBtn = document.getElementById('play-mode-btn');
+const creationModeBtn = document.getElementById('creation-mode-btn');
 const playModeArea = document.getElementById('play-mode-area');
 const computerObject = document.getElementById('computer-object');
 const playerObjects = document.getElementById('player-objects');
@@ -24,7 +25,6 @@ let usedObjectsArray = [];
 let selectedEmoji = '';
 let objectRelations = {};
 let conversationHistory = [];
-let room; // WebsimSocket instance
 
 // Local Storage Functions
 function loadFromLocalStorage() {
@@ -83,6 +83,19 @@ function updateUsedObjects() {
 
 // Object Management Functions
 function deleteObject(index) {
+  const deletedObject = usedObjectsArray[index];
+  usedObjectsArray.splice(index, 1);
+  delete objectRelations[deletedObject];
+  
+  for (let obj in objectRelations) {
+    objectRelations[obj].beats = objectRelations[obj].beats.filter(item => item !== deletedObject);
+    objectRelations[obj].beatenBy = objectRelations[obj].beatenBy.filter(item => item !== deletedObject);
+  }
+  
+  saveToLocalStorage();
+}
+
+function deleteObjectFromStorage(index) {
   const deletedObject = usedObjectsArray[index];
   usedObjectsArray.splice(index, 1);
   delete objectRelations[deletedObject];
@@ -321,99 +334,15 @@ function startPlayMode() {
   playResult.textContent = '';
 }
 
-async function initializeMultiplayer() {
-  room = new WebsimSocket();
+function switchToCreationMode(initialSelection = false) {
+  gameArea.style.display = 'none';
+  playModeArea.style.display = 'none';
+  emojiSelector.style.display = 'block';
+  startGameBtn.style.display = 'block';
+  playNowBtn.style.display = 'block';
   
-  try {
-    await room.initialize();
-    console.log("Multiplayer initialized, client ID:", room.clientId);
-    
-    // Subscribe to presence updates
-    room.subscribePresence((presenceData) => {
-      console.log("Presence updated:", presenceData);
-      
-      // Check if someone joined our battle
-      if (room.roomState.battleActive && room.roomState.battleInitiator === room.clientId) {
-        const opponents = Object.keys(presenceData).filter(id => 
-          id !== room.clientId && 
-          presenceData[id].inBattle && 
-          presenceData[id].opponentId === room.clientId
-        );
-        
-        if (opponents.length > 0) {
-          // We have an opponent
-          const opponentId = opponents[0];
-          console.log("Opponent joined:", opponentId);
-          
-          // Update UI to show opponent joined
-          if (computerObject.textContent.includes("Waiting")) {
-            computerObject.textContent = `Opponent has joined! They are choosing their object...`;
-            playerObjects.innerHTML = 'Choose your object: ';
-            
-            // Display the available objects
-            room.roomState.availableObjects.forEach(obj => {
-              const objButton = document.createElement('button');
-              objButton.className = 'player-object-btn';
-              objButton.textContent = obj;
-              objButton.onclick = () => selectObjectForMultiplayerBattle(obj);
-              playerObjects.appendChild(objButton);
-            });
-            
-            playResult.textContent = 'Make your selection. Your opponent will not see your choice until both players have chosen.';
-          }
-        }
-      }
-    });
-    
-    // Subscribe to room state updates
-    room.subscribeRoomState((roomState) => {
-      console.log("Room state updated:", roomState);
-      
-      // Check if both players have selected an object
-      if (roomState.battleActive && roomState.playerSelections) {
-        const selections = roomState.playerSelections;
-        const playerIds = Object.keys(selections);
-        
-        if (playerIds.length === 2) {
-          // Both players have made selections
-          const mySelection = selections[room.clientId];
-          const opponentId = playerIds.find(id => id !== room.clientId);
-          const opponentSelection = selections[opponentId];
-          
-          if (mySelection && opponentSelection) {
-            console.log("Both players have selected:", mySelection, opponentSelection);
-            
-            // Resolve the battle
-            resolveBattle(mySelection, opponentSelection, opponentId);
-          }
-        }
-      }
-    });
-    
-    // Handle messages
-    room.onmessage = (event) => {
-      const data = event.data;
-      console.log("Received message:", data);
-      
-      switch (data.type) {
-        case "battleJoined":
-          if (room.roomState.battleInitiator === room.clientId) {
-            console.log("Player joined our battle:", data.joinerId);
-          }
-          break;
-          
-        case "battleResult":
-          console.log("Battle result:", data);
-          // Already handled by resolveBattle function
-          break;
-          
-        default:
-          console.log("Unknown message type:", data.type);
-      }
-    };
-    
-  } catch (error) {
-    console.error("Failed to initialize multiplayer:", error);
+  if (initialSelection) {
+    currentObject.textContent = '🎯';
   }
 }
 
@@ -434,11 +363,7 @@ emojiSelector.addEventListener('click', e => {
 
 startGameBtn.addEventListener('click', () => {
   if (selectedEmoji) {
-    emojiSelector.style.display = 'none';
-    startGameBtn.style.display = 'none';
-    playNowBtn.style.display = 'none';
-    gameArea.style.display = 'block';
-    playModeArea.style.display = 'none';
+    switchToCreationMode();
     
     currentObject.textContent = selectedEmoji;
     
@@ -455,17 +380,15 @@ startGameBtn.addEventListener('click', () => {
     
     updateUsedObjects();
     saveToLocalStorage();
+    updateObjectHistory();
+    updateObjectDetails();
     animateCurrentObject();
   }
 });
 
 playNowBtn.addEventListener('click', () => {
   if (usedObjectsArray.length > 0) {
-    emojiSelector.style.display = 'none';
-    startGameBtn.style.display = 'none';
-    playNowBtn.style.display = 'none';
-    gameArea.style.display = 'block';
-    playModeArea.style.display = 'none';
+    switchToCreationMode();
     
     currentObject.textContent = usedObjectsArray[usedObjectsArray.length - 1];
     updateUsedObjects();
@@ -495,15 +418,32 @@ closeTutorial.addEventListener('click', () => {
 objectHistory.addEventListener('click', e => {
   if (e.target.classList.contains('delete-object')) {
     const index = parseInt(e.target.dataset.index);
-    deleteObject(index);
+    deleteObjectFromStorage(index);
+    updateObjectHistory();
+    updateObjectDetails();
   }
 });
 
 playModeBtn.addEventListener('click', startPlayMode);
 
-// Initialize
-loadFromLocalStorage();
-initializeMultiplayer();
+creationModeBtn.addEventListener('click', () => {
+    if (usedObjectsArray.length > 0) {
+        switchToCreationMode();
+        currentObject.textContent = usedObjectsArray[usedObjectsArray.length - 1];
+        updateUsedObjects();
+        animateCurrentObject();
+    } else {
+        // If no objects, reset to initial selection screen
+        switchToCreationMode(true);
+    }
+});
 
-// Check if there are saved objects to enable/disable the Play Now button
-playNowBtn.disabled = usedObjectsArray.length === 0;
+// Initialize
+function initializeGame() {
+    loadFromLocalStorage();
+    updateObjectHistory();
+    updateObjectDetails();
+    playNowBtn.disabled = usedObjectsArray.length === 0;
+}
+
+initializeGame();

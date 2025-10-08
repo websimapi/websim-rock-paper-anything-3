@@ -88,7 +88,7 @@ function showResult(message, isLoading = false) {
       result.innerHTML = '❌ ' + message;
       result.style.backgroundColor = '#fadbd8'; // Error red
     } else {
-      result.innerHTML = message;
+      result.innerHTML = '🤔 ' + message;
       result.style.backgroundColor = '#eaf2f8'; // Default blue
     }
   }
@@ -97,4 +97,24 @@ function showResult(message, isLoading = false) {
   setTimeout(() => {
     result.style.opacity = '1';
   }, 100);
+}
+
+function switchToCreationMode(reset = false) {
+    gameArea.style.display = 'flex';
+    playModeArea.style.display = 'none';
+    playModeBtn.style.display = 'block';
+    creationModeBtn.style.display = 'none';
+    document.body.classList.remove('battle-mode');
+
+    if (reset || usedObjectsArray.length === 0) {
+        emojiSelector.style.display = 'flex';
+        startGameBtn.style.display = 'block';
+        playNowBtn.style.display = 'block';
+        gameArea.style.display = 'none';
+        playNowBtn.disabled = usedObjectsArray.length === 0;
+    } else {
+        emojiSelector.style.display = 'none';
+        startGameBtn.style.display = 'none';
+        playNowBtn.style.display = 'none';
+    }
 }

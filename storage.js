@@ -3,26 +3,16 @@ function loadFromLocalStorage() {
   const savedObjects = localStorage.getItem('usedObjects');
   const savedRelations = localStorage.getItem('objectRelations');
   
-  if (savedObjects) {
-    usedObjectsArray = JSON.parse(savedObjects);
-    updateObjectHistory();
-  }
-  
-  if (savedRelations) {
-    objectRelations = JSON.parse(savedRelations);
-  }
-  
-  updateObjectDetails();
+  usedObjectsArray = savedObjects ? JSON.parse(savedObjects) : [];
+  objectRelations = savedRelations ? JSON.parse(savedRelations) : {};
 }
 
 function saveToLocalStorage() {
   localStorage.setItem('usedObjects', JSON.stringify(usedObjectsArray));
   localStorage.setItem('objectRelations', JSON.stringify(objectRelations));
-  updateObjectHistory();
-  updateObjectDetails();
 }
 
-function deleteObject(index) {
+function deleteObjectFromStorage(index) {
   const deletedObject = usedObjectsArray[index];
   usedObjectsArray.splice(index, 1);
   delete objectRelations[deletedObject];
